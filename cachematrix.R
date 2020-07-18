@@ -23,18 +23,30 @@ makeCacheMatrix <- function(x = matrix()) {
 ## then the cachesolve should retrieve the inverse from the cache.
 
 cacheSolve <- function(x, ...) {
-        m <- x$getmatrix
+        m <- x$getmatrix()
         if(!is.null(m))
         {
           print("getting cached data")
           return(m)
         }
         data = x$get()
-        if(nrow(x) == ncol(x) && det(x)!=0)
-        {
-          m <- solve(x, ...)
-        }
         
-        x$setmatrix(m)
+        tryCatch({
+          m <- solve(data, ...)
+        },
+        error = function(e){
+          message("Error:")
+          message(e)
+          return(NA)
+        },
+        warning = function(e){
+          message("Warning")
+          message(e)
+          return(NA)
+        },
+        finally = {
+          x$setmatrix(m)
+        })
+        
         m
 }
